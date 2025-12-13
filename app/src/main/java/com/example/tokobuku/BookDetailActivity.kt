@@ -1,25 +1,47 @@
 package com.example.tokobuku
 
+import android.content.Intent
 import android.content.res.ColorStateList
+import android.os.Build
 import android.os.Bundle
-import android.util.Log // 1. PASTIKAN IMPORT LOG SUDAH ADA
+import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import com.example.tokobuku.activity.AddBookActivity
+import com.example.tokobuku.model.UserRole
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import kotlinx.coroutines.launch
 import kotlin.math.floor
 
 class BookDetailActivity : AppCompatActivity() {
 
+    private lateinit var db: BookDatabase
+    private var userRole: UserRole? = null
+    private var currentBook: Book? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_book_detail)
+
+        db = BookDatabase.getDatabase(this)
+
+        userRole = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra(BookListActivity.EXTRA_USER_ROLE, UserRole::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            intent.getParcelableExtra(BookListActivity.EXTRA_USER_ROLE) as? UserRole
+        }
 
         // Inisialisasi Views
         val appBarLayout: AppBarLayout = findViewById(R.id.appBarLayout)
@@ -39,101 +61,112 @@ class BookDetailActivity : AppCompatActivity() {
             onBackPressedDispatcher.onBackPressed()
         }
 
-        // Ambil data yang dikirim (HANYA SEKALI DI ATAS)
-        val title = intent.getStringExtra("BOOK_TITLE")
-        val author = intent.getStringExtra("BOOK_AUTHOR")
-        val description = intent.getStringExtra("BOOK_DESCRIPTION")
-        val imageResId = intent.getIntExtra("BOOK_IMAGE_RES", 0)
-        val tags = intent.getStringArrayExtra("BOOK_TAGS")
-        val backgroundColorResId = intent.getIntExtra("BOOK_BACKGROUND_RES", 0)
-        val rating = intent.getFloatExtra("BOOK_RATING", 0.0f) // <-- Variabel rating sudah diambil di sini
-
-        // Set data ke Views
-        bookTitleTextView.text = title
-        bookAuthorTextView.text = author
-        bookDescriptionTextView.text = description
-        if (imageResId != 0) {
-            bookCoverImageView.setImageResource(imageResId)
-        }
-
-        // Atur background AppBarLayout
-        if (backgroundColorResId != 0) {
-            val color = ContextCompat.getColor(this, backgroundColorResId)
-            appBarLayout.setBackgroundColor(color)
+        // Ambil data buku dari intent
+        currentBook = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra("BOOK_EXTRA", Book::class.java)
         } else {
-            val defaultColor = ContextCompat.getColor(this, R.color.bg_book_default)
-            appBarLayout.setBackgroundColor(defaultColor)
+            @Suppress("DEPRECATION")
+            intent.getParcelableExtra("BOOK_EXTRA") as? Book
         }
 
-        // --- BAGIAN YANG DIPERBAIKI ---
-        // 2. Gunakan Log.d di baris terpisah
-        Log.d("BookDetail", "Rating yang diterima: $rating")
+        currentBook?.let { book ->
+            bookTitleTextView.text = book.title
+            bookAuthorTextView.text = book.author
+            bookDescriptionTextView.text = book.description
+            if (book.imageRes != 0) {
+                bookCoverImageView.setImageResource(book.imageRes)
+            }
 
-        // 3. Tampilkan rating menggunakan variabel yang sudah ada
-        displayRating(rating, ratingStarsLayout)
-        // --- AKHIR BAGIAN PERBAIKAN ---
+            if (book.backgroundColorResId != 0) {
+                val color = ContextCompat.getColor(this, book.backgroundColorResId)
+                appBarLayout.setBackgroundColor(color)
+            } else {
+                val defaultColor = ContextCompat.getColor(this, R.color.bg_book_default)
+                appBarLayout.setBackgroundColor(defaultColor)
+            }
 
-        // Logika untuk Chip
-        val colorPairs = listOf(
-            Pair(R.color.chip_bg_blue, R.color.chip_text_blue),
-            Pair(R.color.chip_bg_green, R.color.chip_text_green),
-            Pair(R.color.chip_bg_orange, R.color.chip_text_orange)
-        )
-        tags?.forEachIndexed { index, tagName ->
-            val chip = Chip(this)
-            chip.text = tagName
-            chip.isCloseIconVisible = false
-            val colorPair = colorPairs[index % colorPairs.size]
-            val chipBackgroundColor = ContextCompat.getColor(this, colorPair.first)
-            val chipTextColor = ContextCompat.getColor(this, colorPair.second)
-            chip.chipBackgroundColor = ColorStateList.valueOf(chipBackgroundColor)
-            chip.setTextColor(chipTextColor)
-            tagChipGroup.addView(chip)
+            displayRating(book.rating, ratingStarsLayout)
+
+            val colorPairs = listOf(
+                Pair(R.color.chip_bg_blue, R.color.chip_text_blue),
+                Pair(R.color.chip_bg_green, R.color.chip_text_green),
+                Pair(R.color.chip_bg_orange, R.color.chip_text_orange)
+            )
+            book.tags.forEachIndexed { index, tagName ->
+                val chip = Chip(this)
+                chip.text = tagName
+                chip.isCloseIconVisible = false
+                val colorPair = colorPairs[index % colorPairs.size]
+                val chipBackgroundColor = ContextCompat.getColor(this, colorPair.first)
+                val chipTextColor = ContextCompat.getColor(this, colorPair.second)
+                chip.chipBackgroundColor = ColorStateList.valueOf(chipBackgroundColor)
+                chip.setTextColor(chipTextColor)
+                tagChipGroup.addView(chip)
+            }
+        }
+
+        invalidateOptionsMenu()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        if (userRole is UserRole.Admin) {
+            menuInflater.inflate(R.menu.detail_menu_admin, menu)
+        }
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_edit -> {
+                val intent = Intent(this, AddBookActivity::class.java).apply {
+                    putExtra("BOOK_EXTRA", currentBook)
+                }
+                startActivity(intent)
+                true
+            }
+            R.id.action_delete -> {
+                showDeleteConfirmationDialog()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
+    private fun showDeleteConfirmationDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Delete Book")
+            .setMessage("Are you sure you want to delete this book?")
+            .setPositiveButton("Yes") { _, _ ->
+                lifecycleScope.launch {
+                    currentBook?.let { db.bookDao().delete(it) }
+                    finish()
+                }
+            }
+            .setNegativeButton("No", null)
+            .show()
+    }
 
-
-    // --- FUNGSI YANG SUDAH DIPERBAIKI UNTUK TAMPILAN KONSISTEN ---
-    // --- FUNGSI FINAL DENGAN LOGIKA BINTANG SETENGAH ---
-    // --- FUNGSI INI SEKARANG AKAN BEKERJA DENGAN BENAR ---
     private fun displayRating(rating: Float, layout: LinearLayout) {
         layout.removeAllViews()
 
-        // Mengambil warna dari colors.xml, misalnya #FFC107
         val starColor = ContextCompat.getColor(this, R.color.star_color)
 
-        // Loop sebanyak 5 kali untuk 5 bintang
         for (i in 1..5) {
             val star = ImageView(this)
 
-            // Menggunakan 'when' untuk logika yang lebih jelas
             when {
-                // Kondisi 1: Bintang penuh
                 i <= rating -> {
-                    star.setImageResource(R.drawable.ic_star_filled) // Gunakan ikon Anda
+                    star.setImageResource(R.drawable.ic_star_filled)
                 }
-
-                // Kondisi 2: Bintang setengah
                 i - 1 < rating && i > rating -> {
-                    star.setImageResource(R.drawable.ic_star_half) // Gunakan ikon Anda
+                    star.setImageResource(R.drawable.ic_star_half)
                 }
-
-                // Kondisi 3: Bintang kosong
                 else -> {
-                    star.setImageResource(R.drawable.ic_star_border) // Gunakan ikon Anda
+                    star.setImageResource(R.drawable.ic_star_border)
                 }
             }
-
-            // Atur warna kuning untuk semua jenis bintang
-            // Ini akan menimpa warna fillColor di dalam file XML, memberikan kontrol terpusat
             star.setColorFilter(starColor)
             layout.addView(star)
         }
     }
-
-
-
-
-
 }

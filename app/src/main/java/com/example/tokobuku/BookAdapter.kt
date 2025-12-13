@@ -60,6 +60,13 @@ class BookAdapter(private var bookList: MutableList<Book>) :
         }
     }
 
+    fun updateData(newBooks: List<Book>) {
+        bookList.clear()
+        bookList.addAll(newBooks)
+        bookListFull = ArrayList(newBooks)
+        notifyDataSetChanged()
+    }
+
     override fun getItemCount() = bookList.size
 
     fun updateFullList() {
@@ -95,4 +102,3 @@ class BookAdapter(private var bookList: MutableList<Book>) :
         }
     }
 }
-

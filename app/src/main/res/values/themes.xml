@@ -1,0 +1,26 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.TokoBuku" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    </style>
+
+    <!-- Style untuk Chip dengan warna berbeda -->
+    <style name="ChipStyle_Blue" parent="Widget.MaterialComponents.Chip.Entry">
+        <item name="chipBackgroundColor">#E0F7FA</item> <!-- Warna latar belakang -->
+        <item name="android:textColor">#00796B</item> <!-- Warna teks -->
+    </style>
+
+    <style name="ChipStyle_Green" parent="Widget.MaterialComponents.Chip.Entry">
+        <item name="chipBackgroundColor">#E8F5E9</item>
+        <item name="android:textColor">#388E3C</item>
+    </style>
+
+    <style name="ChipStyle_Orange" parent="Widget.MaterialComponents.Chip.Entry">
+        <item name="chipBackgroundColor">#FFF3E0</item>
+        <item name="android:textColor">#F57C00</item>
+    </style> <!-- Penutup yang hilang ditambahkan di sini -->
+
+    <style name="Theme.TokoBuku" parent="Base.Theme.TokoBuku" />
+
+</resources>

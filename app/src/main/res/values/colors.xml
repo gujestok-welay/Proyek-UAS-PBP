@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Warna Aplikasi Dasar -->
+    <color name="card_background">#FFFFFF</color>
+    <color name="app_background">#F5F0E8</color>
+    <color name="text_primary">#000000</color>
+    <color name="text_secondary">#A1887F</color>
+    <color name="white">#FFFFFF</color>
+    <color name="bottom_nav_background">#8D6E63</color>
+    <color name="star_color">#FFC107</color>
+
+    <!-- Warna untuk Chip (Tag/Genre) -->
+    <color name="chip_bg_blue">#E0F7FA</color>
+    <color name="chip_text_blue">#00796B</color>
+    <color name="chip_bg_green">#E8F5E9</color>
+    <color name="chip_text_green">#388E3C</color>
+    <color name="chip_bg_orange">#FFF3E0</color>
+    <color name="chip_text_orange">#F57C00</color>
+
+    <!-- Warna Latar Belakang Detail Buku -->
+    <color name="bg_book_makanya_mikir">#0cc0df</color>
+    <color name="bg_book_mie_ayam">#3d475a</color>
+    <color name="bg_book_The_Psychology_of_Money">#71877b</color>
+    <color name="bg_book_Educated">#7b2b25</color>
+    <color name="bg_book_default">#6A82FB</color>
+
+</resources>

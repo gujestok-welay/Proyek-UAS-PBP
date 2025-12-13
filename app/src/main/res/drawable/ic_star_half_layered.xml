@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Lapisan 1: Bintang Kosong (di bagian bawah) -->
+    <item android:drawable="@android:drawable/star_off" />
+
+    <!-- Lapisan 2: Bintang Penuh (di bagian atas, dipotong setengah) -->
+    <item>
+        <clip
+            android:clipOrientation="horizontal"
+            android:gravity="left">
+            <bitmap
+                android:gravity="left"
+                android:src="@android:drawable/star_on" />
+        </clip>
+    </item>
+
+</layer-list>
+    

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="8dp"
+    android:layout_marginTop="4dp"
+    android:layout_marginEnd="8dp"
+    android:layout_marginBottom="4dp"
+    app:cardBackgroundColor="@android:color/white"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- Sampul Buku (Sekarang dalam ImageView persegi) -->
+        <ImageView
+            android:id="@+id/bookCoverImageView"
+            android:layout_width="60dp"
+            android:layout_height="80dp" 
+            android:scaleType="centerCrop"
+            android:elevation="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@drawable/book_makanya_mikir" />
+
+        <!-- Judul Buku -->
+        <TextView
+            android:id="@+id/bookTitleTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:textColor="@color/text_primary"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/bookCoverImageView"
+            app:layout_constraintTop_toTopOf="@id/bookCoverImageView"
+            tools:text="Makanya Mikir" />
+
+        <!-- Penulis Buku -->
+        <TextView
+            android:id="@+id/bookAuthorTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/bookTitleTextView"
+            app:layout_constraintTop_toBottomOf="@id/bookTitleTextView"
+            tools:text="Abigail Limuria &amp; Cania Citta" />
+
+        <!-- ====================================================== -->
+        <!--        BAGIAN BARU: RATING DAN JUMLAH REVIEW           -->
+        <!-- ====================================================== -->
+
+        <!-- Ikon Bintang -->
+        <ImageView
+            android:id="@+id/starIconImageView"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginTop="4dp"
+            android:src="@drawable/ic_star_filled"
+            app:layout_constraintStart_toStartOf="@id/bookAuthorTextView"
+            app:layout_constraintTop_toBottomOf="@id/bookAuthorTextView"
+            app:tint="@color/star_color" />
+
+        <!-- Teks Rating -->
+        <TextView
+            android:id="@+id/bookRatingTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="@id/starIconImageView"
+            app:layout_constraintStart_toEndOf="@id/starIconImageView"
+            app:layout_constraintTop_toTopOf="@id/starIconImageView"
+            tools:text="4.9" />
+
+        <!-- Teks Jumlah Review -->
+        <TextView
+            android:id="@+id/bookReviewsTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="@id/bookRatingTextView"
+            app:layout_constraintStart_toEndOf="@id/bookRatingTextView"
+            app:layout_constraintTop_toTopOf="@id/bookRatingTextView"
+            tools:text="(37 Reviews)" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

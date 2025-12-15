@@ -85,7 +85,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/priceTextInputLayout"
+            android:id="@+id/tagsTextInputLayout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -95,29 +95,10 @@
             app:layout_constraintTop_toBottomOf="@+id/descriptionTextInputLayout">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/priceEditText"
+                android:id="@+id/tagsEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Price"
-                android.inputType="numberDecimal" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/stockTextInputLayout"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/priceTextInputLayout">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/stockEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Stock"
-                android:inputType="number" />
+                android:hint="Genre (pisahkan dengan koma)" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
@@ -128,7 +109,7 @@
             android:text="Save Book"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/stockTextInputLayout" />
+            app:layout_constraintTop_toBottomOf="@+id/tagsTextInputLayout" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

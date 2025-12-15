@@ -4,12 +4,12 @@ import androidx.room.TypeConverter
 
 class Converters {
     @TypeConverter
-    fun fromString(value: String): Array<String> {
-        return value.split(",").toTypedArray()
+    fun fromString(value: String): List<String> {
+        return value.split(",").map { it.trim() }
     }
 
     @TypeConverter
-    fun fromArray(array: Array<String>): String {
-        return array.joinToString(",")
+    fun fromList(list: List<String>): String {
+        return list.joinToString(",")
     }
 }

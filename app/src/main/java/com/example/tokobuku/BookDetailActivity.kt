@@ -2,6 +2,7 @@ package com.example.tokobuku
 
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -29,6 +30,7 @@ class BookDetailActivity : AppCompatActivity() {
     private lateinit var db: BookDatabase
     private var userRole: UserRole? = null
     private var currentBook: Book? = null
+    private var bookId: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,7 +45,14 @@ class BookDetailActivity : AppCompatActivity() {
             intent.getParcelableExtra(BookListActivity.EXTRA_USER_ROLE) as? UserRole
         }
 
-        // Inisialisasi Views
+        bookId = intent.getIntExtra("BOOK_ID", -1)
+
+        if (bookId == -1) {
+            // Handle error: No book ID provided
+            finish()
+            return
+        }
+
         val appBarLayout: AppBarLayout = findViewById(R.id.appBarLayout)
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         val bookCoverImageView: ImageView = findViewById(R.id.bookCoverImageView)
@@ -53,45 +62,40 @@ class BookDetailActivity : AppCompatActivity() {
         val tagChipGroup: ChipGroup = findViewById(R.id.tagChipGroup)
         val ratingStarsLayout: LinearLayout = findViewById(R.id.ratingStarsLayout)
 
-        // Setup Toolbar
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowTitleEnabled(false)
-        toolbar.setNavigationOnClickListener {
-            onBackPressedDispatcher.onBackPressed()
-        }
+        toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
-        // Ambil data buku dari intent
-        currentBook = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getParcelableExtra("BOOK_EXTRA", Book::class.java)
-        } else {
-            @Suppress("DEPRECATION")
-            intent.getParcelableExtra("BOOK_EXTRA") as? Book
-        }
-
-        currentBook?.let { book ->
+        db.bookDao().getBookById(bookId).observe(this) { book ->
+            if (book == null) {
+                // The book was deleted, so finish this activity
+                finish()
+                return@observe
+            }
+            currentBook = book
             bookTitleTextView.text = book.title
             bookAuthorTextView.text = book.author
             bookDescriptionTextView.text = book.description
-            if (book.imageRes != 0) {
+
+            if (book.imageUri != null) {
+                bookCoverImageView.setImageURI(Uri.parse(book.imageUri))
+            } else if (book.imageRes != 0) {
                 bookCoverImageView.setImageResource(book.imageRes)
             }
 
-            if (book.backgroundColorResId != 0) {
-                val color = ContextCompat.getColor(this, book.backgroundColorResId)
-                appBarLayout.setBackgroundColor(color)
-            } else {
-                val defaultColor = ContextCompat.getColor(this, R.color.bg_book_default)
-                appBarLayout.setBackgroundColor(defaultColor)
-            }
+            val color = ContextCompat.getColor(this, book.backgroundColorResId)
+            appBarLayout.setBackgroundColor(color)
 
             displayRating(book.rating, ratingStarsLayout)
+            tagChipGroup.removeAllViews() // Clear old tags before adding new ones
 
             val colorPairs = listOf(
                 Pair(R.color.chip_bg_blue, R.color.chip_text_blue),
                 Pair(R.color.chip_bg_green, R.color.chip_text_green),
                 Pair(R.color.chip_bg_orange, R.color.chip_text_orange)
             )
+
             book.tags.forEachIndexed { index, tagName ->
                 val chip = Chip(this)
                 chip.text = tagName
@@ -103,9 +107,9 @@ class BookDetailActivity : AppCompatActivity() {
                 chip.setTextColor(chipTextColor)
                 tagChipGroup.addView(chip)
             }
-        }
 
-        invalidateOptionsMenu()
+            invalidateOptionsMenu()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -139,7 +143,7 @@ class BookDetailActivity : AppCompatActivity() {
             .setPositiveButton("Yes") { _, _ ->
                 lifecycleScope.launch {
                     currentBook?.let { db.bookDao().delete(it) }
-                    finish()
+                    // The observer will handle finishing the activity
                 }
             }
             .setNegativeButton("No", null)
@@ -148,22 +152,13 @@ class BookDetailActivity : AppCompatActivity() {
 
     private fun displayRating(rating: Float, layout: LinearLayout) {
         layout.removeAllViews()
-
         val starColor = ContextCompat.getColor(this, R.color.star_color)
-
         for (i in 1..5) {
             val star = ImageView(this)
-
             when {
-                i <= rating -> {
-                    star.setImageResource(R.drawable.ic_star_filled)
-                }
-                i - 1 < rating && i > rating -> {
-                    star.setImageResource(R.drawable.ic_star_half)
-                }
-                else -> {
-                    star.setImageResource(R.drawable.ic_star_border)
-                }
+                i <= rating -> star.setImageResource(R.drawable.ic_star_filled)
+                i - 1 < rating && i > rating -> star.setImageResource(R.drawable.ic_star_half)
+                else -> star.setImageResource(R.drawable.ic_star_border)
             }
             star.setColorFilter(starColor)
             layout.addView(star)
